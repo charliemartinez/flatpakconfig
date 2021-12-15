@@ -1,68 +1,466 @@
 #!/bin/bash
-#
-# repo-config
 
-# Autor: Charlie Martínez ®
-# Licencia GPLv3
+# Nombre:	flatpak-config.sh
+# Autor:	Charlie Martínez® <cmartinez@quirinux.org>
+# Licencia:	https://www.gnu.org/licenses/gpl-3.0.txt
+# Descripción:	Utilidad gráfica para habilitar o deshabilitar flatpak
+# Versión:	2.0
 
-# Activa o desactiva los repositorios non-free y contrib
-# de Debian Buster  
+# =========================================================================================
+# INICIO / FIN (IDIOMAS) [CÓDIGO REUTILIZABLE]
+# =========================================================================================
+
+# Alemán
+function _inicio_de() # Verifica si está instalado zenity
+{
+if [ -e "/usr/bin/zenity" ]; then # Está instalado, continúa
+_menuPrincipal_de
+else # No está instalado zenity, lo instala y continúa
+_instalarZenity
+_menuPrincipal_de
+fi
+}
+function _fin_de()
+{
+zenity --info *text "Einstellungen vorgenommen. Sie können sie jederzeit umkehren. "
+}
+
+# Inglés
+function _inicio_en() # Verifica si está instalado zenity
+{
+if [ -e "/usr/bin/zenity" ]; then # Está instalado, continúa
+_menuPrincipal_en
+else # No está instalado zenity, lo instala y continúa
+_instalarZenity
+_menuPrincipal_en
+fi
+}
+function _fin_en()
+{
+zenity --info *text "Settings made. You can always reverse them."
+}
+
+# Castellano
+function _inicio_es() # Verifica si está instalado zenity
+{
+if [ -e "/usr/bin/zenity" ]; then # Está instalado, continúa
+_menuPrincipal_es
+else # No está instalado zenity, lo instala y continúa
+_instalarZenity
+_menuPrincipal_es
+fi
+}
+function _fin_es()
+{
+zenity --info *text "Configuraciones realizadas. Siempre puedes revertirlas."
+}
+
+# Francés
+function _inicio_fr() # Verifica si está instalado zenity
+{
+if [ -e "/usr/bin/zenity" ]; then # Está instalado, continúa
+_menuPrincipal_fr
+else # No está instalado zenity, lo instala y continúa
+_instalarZenity
+_menuPrincipal_fr
+fi
+}
+function _fin_fr()
+{
+zenity --info *text "Paramètres définis. Vous pouvez toujours les inverser. "
+}
+
+# Galego
+function _inicio_gl() # Verifica si está instalado zenity
+{
+if [ -e "/usr/bin/zenity" ]; then # Está instalado, continúa
+_menuPrincipal_gl
+else # No está instalado zenity, lo instala y continúa
+_instalarZenity
+_menuPrincipal_gl
+fi
+}
+function _fin_gl()
+{
+zenity --info *text "Configuración feita. Sempre os podes reverter."
+}
+
+# Italiano
+function _inicio_it () # Verifica si está instalado zenity
+{
+if [ -e "/usr/bin/zenity" ]; then # Está instalado, continúa
+_menuPrincipal_it
+else # No está instalado zenity, lo instala y continúa
+_instalarZenity
+_menuPrincipal_it 
+fi
+}
+function _fin_it ()
+{
+zenity --info *text "Impostazioni effettuate. Puoi sempre invertirli. "
+}
+
+# Portugués
+function _inicio_pt() # Verifica si está instalado zenity
+{
+if [ -e "/usr/bin/zenity" ]; then # Está instalado, continúa
+_menuPrincipal_pt
+else # No está instalado zenity, lo instala y continúa
+_instalarZenity
+_menuPrincipal_pt
+fi
+}
+function _fin_pt()
+{
+zenity --info *text "Configurações feitas. Você sempre pode revertê-los."
+}
+
+# Ruso
+function _inicio_ru() # Verifica si está instalado zenity
+{
+if [ -e "/usr/bin/zenity" ]; then # Está instalado, continúa
+_menuPrincipal_ru
+else # No está instalado zenity, lo instala y continúa
+_instalarZenity
+_menuPrincipal_ru
+fi
+}
+function _fin_ru()
+{
+zenity --info *text "Настройки сделаны. Вы всегда можете отменить их.  "
+}
+
+# =========================================================================================
+# INSTALAR ZENITY [CÓDIGO REUTILIZABLE]
+# =========================================================================================
+
+function _instalarZenity()
+{
+sudo apt-get install zenity -y
+}
+
+# =========================================================================================
+# SALIR [CÓDIGO REUTILIZABLE]
+# =========================================================================================
+
+
+function _salir()
+{
+exit 0
+}
+
+# =========================================================================================
+# SELECTOR DE IDIOMA [CÓDIGO REUTILIZABLE]
+# Esta sección fue tomada de Etertics GNU/Linux, 
+# @Autor: Javier Obregón (GPLv3)
+# =========================================================================================
+
+function _idioma() 
+
+{
+
+IDIOMA=$(echo $LANG | cut -d_ -f1) # Idioma del sistema
+
+if [[ $IDIOMA = "es" ]]
+then
+_inicio_es
+
+elif [[ $IDIOMA = "en" ]]
+then
+_inicio_en
+
+elif [[ $IDIOMA = "gl" ]]
+then
+_inicio_gl
+
+elif [[ $IDIOMA = "pt" ]]
+then
+_inicio_pt
+
+elif [[ $IDIOMA = "fr" ]]
+then
+_inicio_fr
+
+elif [[ $IDIOMA = "it" ]]
+then
+_inicio_it
+
+elif [[ $IDIOMA = "de" ]]
+then
+_inicio_de
+
+elif [[ $IDIOMA = "ru" ]]
+then
+_inicio_ru
+
+else
+_inicio_en
+fi
+
+}
+
+# =========================================================================================
+# PROCESOS [NADA QUE TRADUCIR]
+# =========================================================================================
+
+# ACTIVAR FLATPAK
+
+function _activar()
+{
+
+FILE="/usr/bin/mintinstall"
+
+if [ ! -e ${FILE} ]; then
 
 clear
-
-opc=$(zenity --width=640 --height=480 --title=Quirinux --entry --text="
-  		ACTIVAR O DESACTIVAR FLATPAK
-
-	Activa o desactiva el soporte para instalar programas almacenados
-	como repositorios portables tipo Flatpak. Este programa también 
-	sirve para agregarlos o quitarlos al catálogo del Centro de 
-	Software de Mint LMDE4.
-
-	ADVERTENCIA: Si tiene programas Flatpak instalados y desactiva
-	esta opción, esos programas también se desinstalarán. 
-		
-		1) Activar Flatpak
-		2) Desactivar Flatpak
-		0) Salir
-"
-)
-case $opc in
-"1") 
-(
-
-echo "# Activando soporte para Flatpak..."; sleep 1s
+apt-get install gnome-software-plugin-flatpak -y
+flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
+sudo apt-get install gir1.2-flatpak-1.0 -y
+else
 
 sudo apt-get update -y
 sudo apt-get install flatpak -y
 sudo apt-get install -f -y
 sudo apt-get autoremove --purge -y
+flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
+
 sudo apt-get reinstall mintinstall -y
 sudo rm /usr/share/applications/mintinstall.desktop
 sudo cp /opt/mintinstall/applications/* /usr/share/applications/
 sudo cp /opt/mintinstall/icons/* /usr/share/icons/
+sudo apt-get install girl1.2-flatpak-1.0 -y
 
-)|
+fi
 
-zenity --progress --pulsate --auto-close
-title="Quirinux"
-percentage=0
+}
 
-;;
+# DESACTIVAR FLATPAK
 
-"2")
-
-echo "# Desactivando soporte para Flatpak..."; sleep 1s
+function _desactivar()
+{
 
 sudo apt-get update -y
 sudo apt-get remove --purge flatpak -y
 sudo apt-get install -f -y
 sudo apt-get autoremove --purge -y
 
-;;
+}
 
 
-"0")
+# =========================================================================================
+# CASTELLANO
+# =========================================================================================
 
-	exit 0
-;; 
-esac 
+function _menuPrincipal_es()
+{
+opPrincipal=$(
+zenity --list --title "FLATPAK-CONFIG" --width="600" --height="300" \
+--column="Opciones disponibles" \
+"Activar Flatpak" \
+"Desactivar Flatpak" \
+"Salir" \
+)
+if [[ $opPrincipal == "Activar Flatpak" ]]; then
+_activar
+_fin_es
+fi
+if [[ $opPrincipal == "Desactivar Flatpak" ]]; then
+_desactivar
+_fin_es
+fi
+if [[ $opPrincipal == "Salir" ]]; then
+_salir
+fi
+}
+
+# =========================================================================================
+# INGLÉS
+# =========================================================================================
+
+function _menuPrincipal_en()
+{
+opPrincipal=$(
+zenity --list --title "FLATPAK-CONFIG" --width="600" --height="300" \
+--column="Available options" \
+"Activate Flatpak" \
+"Disable Flatpak" \
+"Exit" \
+)
+if [[ $opPrincipal == "Activate Flatpak" ]]; then
+_activar
+_fin_es
+fi
+if [[ $opPrincipal == "Disable Flatpak" ]]; then
+_desactivar
+_fin_es
+fi
+if [[ $opPrincipal == "Exit" ]]; then
+_salir
+fi
+}
+
+
+
+# =========================================================================================
+# GALLEGO
+# =========================================================================================
+
+function _menuPrincipal_gl()
+{
+opPrincipal=$(
+zenity --list --title "FLATPAK-CONFIG" --width="600" --height="300" \
+--column="Opcións dispoñibles" \
+"Activa Flatpak" \
+"Desactivar Flatpak" \
+"Saída" \
+)
+if [[ $opPrincipal == "Activa Flatpak" ]]; then
+_activar
+_fin_es
+fi
+if [[ $opPrincipal == "Desactivar Flatpak" ]]; then
+_desactivar
+_fin_es
+fi
+if [[ $opPrincipal == "Saída" ]]; then
+_salir
+fi
+}
+
+
+
+# =========================================================================================
+# PORTUGUES
+# =========================================================================================
+
+function _menuPrincipal_pt()
+{
+opPrincipal=$(
+zenity --list --title "FLATPAK-CONFIG" --width="600" --height="300" \
+--column="Opções disponíveis" \
+"Ativar Flatpak" \
+"Desativar Flatpak" \
+"Saia" \
+)
+if [[ $opPrincipal == "Ativar Flatpak" ]]; then
+_activar
+_fin_es
+fi
+if [[ $opPrincipal == "Desativar Flatpak" ]]; then
+_desactivar
+_fin_es
+fi
+if [[ $opPrincipal == "Saia" ]]; then
+_salir
+fi
+}
+
+# =========================================================================================
+# FRANCÉS
+# =========================================================================================
+
+function _menuPrincipal_fr()
+{
+opPrincipal=$(
+zenity --list --title "FLATPAK-CONFIG" --width="600" --height="300" \
+--column="Options disponibles " \
+"Activer Flatpak" \
+"Désactiver Flatpak" \
+"Sortir" \
+)
+if [[ $opPrincipal == "Activer Flatpak" ]]; then
+_activar
+_fin_es
+fi
+if [[ $opPrincipal == "Désactiver Flatpak" ]]; then
+_desactivar
+_fin_es
+fi
+if [[ $opPrincipal == "Sortir" ]]; then
+_salir
+fi
+}
+
+# =========================================================================================
+# ITALIANO
+# =========================================================================================
+
+function _menuPrincipal_it ()
+{
+opPrincipal=$(
+zenity --list --title "FLATPAK-CONFIG" --width="600" --height="300" \
+--column="Opzioni disponibili" \
+"Attiva Flatpak" \
+"Disabilita Flatpak" \
+"Esci" \
+)
+if [[ $opPrincipal == "Attiva Flatpak" ]]; then
+_activar
+_fin_es
+fi
+if [[ $opPrincipal == "Disabilita Flatpak" ]]; then
+_desactivar
+_fin_es
+fi
+if [[ $opPrincipal == "Esci" ]]; then
+_salir
+fi
+}
+
+
+# =========================================================================================
+# ALEMAN
+# =========================================================================================
+
+function _menuPrincipal_de()
+{
+opPrincipal=$(
+zenity --list --title "FLATPAK-CONFIG" --width="600" --height="300" \
+--column="Verfügbare Optionen " \
+"Flatpak aktivieren" \
+"Flatpak deaktivieren" \
+"Aussteigen" \
+)
+if [[ $opPrincipal == "Flatpak aktivieren" ]]; then
+_activar
+_fin_es
+fi
+if [[ $opPrincipal == "Flatpak deaktivieren" ]]; then
+_desactivar
+_fin_es
+fi
+if [[ $opPrincipal == "Aussteigen" ]]; then
+_salir
+fi
+}
+
+# =========================================================================================
+# RUSO
+# =========================================================================================
+
+function _menuPrincipal_ru()
+{
+opPrincipal=$(
+zenity --list --title "FLATPAK-CONFIG" --width="600" --height="300" \
+--column="Доступные Варианты  " \
+"Активировать Flatpak" \
+"Отключить Flatpak" \
+"Убирайся" \
+)
+if [[ $opPrincipal == "Активировать Flatpak" ]]; then
+_activar
+_fin_es
+fi
+if [[ $opPrincipal == "Отключить Flatpak" ]]; then
+_desactivar
+_fin_es
+fi
+if [[ $opPrincipal == "Убирайся" ]]; then
+_salir
+fi
+}
+
+
+# =========================================================================================
+
+_idioma
