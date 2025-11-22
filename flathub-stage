@@ -1,0 +1,157 @@
+#!/bin/bash
+
+# Nombre:      flatpak-config.sh
+# Autor:       Charlie Martínez® <cmartinez@quirinux.org>
+# Licencia:    GPLv3
+# Descripción: Utilidad gráfica para habilitar o deshabilitar flatpak
+# Versión:     2.1 (Devuan Daedalus / Excalibur / Ceres compatible)
+
+# =========================================================================================
+# Comprobación de root
+# =========================================================================================
+
+function _require_root() {
+    if [ "$EUID" -ne 0 ]; then
+        zenity --error --text="Este script debe ejecutarse como root."
+        exit 1
+    fi
+}
+
+# =========================================================================================
+# FIN (mensajes por idioma)
+# =========================================================================================
+
+function _fin_es(){ zenity --info --text "Configuraciones realizadas. Siempre puedes revertirlas." ;}
+function _fin_en(){ zenity --info --text "Settings applied. You can always revert them." ;}
+function _fin_gl(){ zenity --info --text "Configuración feita. Sempre podes revertela." ;}
+function _fin_pt(){ zenity --info --text "Configurações feitas. Você sempre pode revertê-las." ;}
+function _fin_fr(){ zenity --info --text "Paramètres appliqués. Vous pouvez toujours les inverser." ;}
+function _fin_it(){ zenity --info --text "Impostazioni applicate. Puoi sempre invertirle." ;}
+function _fin_de(){ zenity --info --text "Einstellungen vorgenommen. Sie können sie jederzeit rückgängig machen." ;}
+function _fin_ru(){ zenity --info --text "Настройки применены. Вы всегда можете отменить их." ;}
+
+# =========================================================================================
+# SALIR
+# =========================================================================================
+function _salir(){ exit 0; }
+
+# =========================================================================================
+# ACTIVAR FLATPAK (sin ostree)
+# =========================================================================================
+function _activar() {
+(
+    echo "5"; sleep 1
+    apt-get update -y
+
+    echo "20"; sleep 1
+    apt-get install -y flatpak gir1.2-flatpak-1.0 gnome-software-plugin-flatpak
+
+    echo "35"; sleep 1
+    # Si el repo está corrupto, eliminarlo
+    if [ -d /var/lib/flatpak ] && [ ! -d /var/lib/flatpak/repo/objects ]; then
+        rm -rf /var/lib/flatpak
+    fi
+
+    echo "50"; sleep 1
+    # Crear repo vacío válido
+    if ! [ -d /var/lib/flatpak/repo ]; then
+        mkdir -p /var/lib/flatpak/repo
+        touch /var/lib/flatpak/repo/config
+    fi
+
+    echo "65"; sleep 1
+    # Agregar Flathub
+    flatpak remote-add --system --if-not-exists flathub \
+        https://dl.flathub.org/repo/flathub.flatpakrepo
+
+    echo "80"; sleep 1
+    # Crear rutas necesarias para mintinstall
+    mkdir -p /var/lib/flatpak/exports/share/{applications,icons}
+
+    echo "95"; sleep 1
+    # Reparar si existe la herramienta
+    if command -v flatpak >/dev/null && flatpak repair --help >/dev/null 2>&1; then
+        flatpak repair --system --non-interactive || true
+    fi
+
+    echo "100"; sleep 1
+
+) | zenity --progress --title="Configurando Flatpak" --text="Ten paciencia..." \
+           --percentage=0 --auto-close --auto-kill
+}
+
+# =========================================================================================
+# DESACTIVAR FLATPAK
+# =========================================================================================
+function _desactivar() {
+(
+    echo "10"; sleep 1
+    apt-get remove --purge -y flatpak gir1.2-flatpak-1.0 gnome-software-plugin-flatpak
+
+    echo "40"; sleep 1
+    apt-get autoremove --purge -y
+
+    echo "80"; sleep 1
+    rm -rf /var/lib/flatpak
+
+    echo "100"; sleep 1
+
+) | zenity --progress --title="Desactivando Flatpak" --text="Espere..." \
+           --percentage=0 --auto-close --auto-kill
+}
+
+# =========================================================================================
+# MENÚS POR IDIOMA
+# =========================================================================================
+
+function _menu_tpl() {
+    local title="$1"
+    local opt1="$2"
+    local opt2="$3"
+    local exit_lbl="$4"
+    local finish_func="$5"
+
+    opPrincipal=$(
+        zenity --list --title="$title" --width="600" --height="300" \
+        --column="" "$opt1" "$opt2" "$exit_lbl"
+    )
+
+    case "$opPrincipal" in
+        "$opt1") _activar; $finish_func ;;
+        "$opt2") _desactivar; $finish_func ;;
+        "$exit_lbl") _salir ;;
+    esac
+}
+
+function _menuPrincipal_es(){ _menu_tpl "FLATPAK-CONFIG" "Activar Flatpak" "Desactivar Flatpak" "Salir" _fin_es; }
+function _menuPrincipal_en(){ _menu_tpl "FLATPAK-CONFIG" "Activate Flatpak" "Disable Flatpak" "Exit" _fin_en; }
+function _menuPrincipal_gl(){ _menu_tpl "FLATPAK-CONFIG" "Activa Flatpak" "Desactivar Flatpak" "Saída" _fin_gl; }
+function _menuPrincipal_pt(){ _menu_tpl "FLATPAK-CONFIG" "Ativar Flatpak" "Desativar Flatpak" "Sair" _fin_pt; }
+function _menuPrincipal_fr(){ _menu_tpl "FLATPAK-CONFIG" "Activer Flatpak" "Désactiver Flatpak" "Sortir" _fin_fr; }
+function _menuPrincipal_it(){ _menu_tpl "FLATPAK-CONFIG" "Attiva Flatpak" "Disabilita Flatpak" "Esci" _fin_it; }
+function _menuPrincipal_de(){ _menu_tpl "FLATPAK-CONFIG" "Flatpak aktivieren" "Flatpak deaktivieren" "Beenden" _fin_de; }
+function _menuPrincipal_ru(){ _menu_tpl "FLATPAK-CONFIG" "Активировать Flatpak" "Отключить Flatpak" "Выход" _fin_ru; }
+
+# =========================================================================================
+# DETECCIÓN DE IDIOMA
+# =========================================================================================
+
+function _idioma() {
+    _require_root
+    
+    case "${LANG%%_*}" in
+        es) _menuPrincipal_es ;;
+        en) _menuPrincipal_en ;;
+        gl) _menuPrincipal_gl ;;
+        pt) _menuPrincipal_pt ;;
+        fr) _menuPrincipal_fr ;;
+        it) _menuPrincipal_it ;;
+        de) _menuPrincipal_de ;;
+        ru) _menuPrincipal_ru ;;
+        *)  _menuPrincipal_en ;;
+    esac
+}
+
+# =========================================================================================
+
+_idioma
