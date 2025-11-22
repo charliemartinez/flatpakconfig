@@ -1,555 +1,155 @@
 #!/bin/bash
 
-# Nombre:	flatpak-config.sh
-# Autor:	Charlie Martínez® <cmartinez@quirinux.org>
-# Licencia:	https://www.gnu.org/licenses/gpl-3.0.txt
-# Descripción:	Utilidad gráfica para habilitar o deshabilitar flatpak
-# Versión:	2.0
+# Nombre:      flatpak-config.sh
+# Autor:       Charlie Martínez® <cmartinez@quirinux.org>
+# Licencia:    GPLv3
+# Descripción: Utilidad gráfica para habilitar o deshabilitar flatpak
+# Versión:     Quirinux, Devuan Daedalus, Excalibur, Ceres
 
 # =========================================================================================
-# INICIO / FIN (IDIOMAS) [CÓDIGO REUTILIZABLE]
+# Comprobación de root
 # =========================================================================================
 
-function _inicio_es() 
-
-{
-
-if [ "$EUID" -ne 0 ]; then
-    echo ''
-    echo "Este script debe ejecutarse con permisos de root."
-    echo 'Puedes intentarlo con "sudo" tuusuario, "sudo su" o "su root".'
-    echo ''
-    exit 1
-fi
-_menuPrincipal_es
-}
-
-function _inicio_de() 
-{
-
-if [ "$EUID" -ne 0 ]; then
-    echo ''
-    echo "Dieses Skript muss mit Root-Rechten ausgeführt werden."
-    echo 'Du kannst es mit "sudo deinbenutzer", "sudo su" oder "su root" versuchen.'
-    echo ''
-    exit 1
-fi
-_menuPrincipal_de
-}
-
-function _inicio_en()
-{
-
-if [ "$EUID" -ne 0 ]; then
-    echo ''
-    echo "This script must be run with root permissions."
-    echo 'You can try with "sudo yourusername", "sudo su", or "su root".'
-    echo ''
-    exit 1
-
-fi
-_menuPrincipal_en
-}
-
-function _inicio_fr() 
-{
-
-if [ "$EUID" -ne 0 ]; then
-    echo ''
-    echo "Ce script doit être exécuté avec des permissions de root."
-    echo 'Vous pouvez essayer avec "sudo votrenomdutilisateur", "sudo su" ou "su root".'
-    echo ''
-    exit 1
-fi
-_menuPrincipal_fr
-}
-
-function _inicio_gl() 
-{
-if [ "$EUID" -ne 0 ]; then
-    echo ''
-    echo "Este script debe ser executado con permisos de root."
-    echo 'Podes intentalo con "sudo o teuusuario", "sudo su" ou "su root".'
-    echo ''
-    exit 1
-fi
-_menuPrincipal_gl
-}
-
-function _inicio_it ()
-{
-if [ "$EUID" -ne 0 ]; then
-    echo ''
-    echo "Questo script deve essere eseguito con i permessi di root."
-    echo 'Puoi provare con "sudo iltuoutente", "sudo su" o "su root".'
-    echo ''
-    exit 1
-fi
-_menuPrincipal_it 
-}
-
-function _inicio_pt() 
-{
-if [ "$EUID" -ne 0 ]; then
-    echo ''
-    echo "Este script deve ser executado com permissões de root."
-    echo 'Você pode tentar com "sudo seunome de usuário", "sudo su" ou "su root".'
-    echo ''
-    exit 1
-fi
-_menuPrincipal_pt
-
-}
-
-function _inicio_ru() 
-{
-if [ "$EUID" -ne 0 ]; then
-    echo ''
-    echo "Этот скрипт должен выполняться с правами root."
-    echo 'Вы можете попробовать с "sudo вашеимяпользователя", "sudo su" или "su root".'
-    echo ''
-    exit 1
-fi
-_menuPrincipal_ru
-
-}
-
-function _fin_en()
-{
-zenity --info --text "Settings made. You can always reverse them."
-}
-
-function _fin_es()
-{
-zenity --info --text "Configuraciones realizadas. Siempre puedes revertirlas."
-}
-
-function _fin_gl()
-{
-zenity --info --text "Configuración feita. Sempre os podes reverter."
-}
-
-function _fin_ru()
-{
-zenity --info --text "Настройки сделаны. Вы всегда можете отменить их.  "
-}
-
-function _fin_de()
-{
-zenity --info --text "Einstellungen vorgenommen. Sie können sie jederzeit umkehren. "
-}
-
-function _fin_pt()
-{
-zenity --info --text "Configurações feitas. Você sempre pode revertê-los."
-}
-
-function _fin_it ()
-{
-zenity --info --text "Impostazioni effettuate. Puoi sempre invertirli. "
-}
-function _fin_fr()
-{
-zenity --info --text "Paramètres définis. Vous pouvez toujours les inverser. "
-}
-
-
-
-# =========================================================================================
-# SALIR [CÓDIGO REUTILIZABLE]
-# =========================================================================================
-
-function _salir()
-{
-exit 0
+function _require_root() {
+    if [ "$EUID" -ne 0 ]; then
+        zenity --error --text="Este script debe ejecutarse como root."
+        exit 1
+    fi
 }
 
 # =========================================================================================
-# SELECTOR DE IDIOMA [CÓDIGO REUTILIZABLE]
-# Esta sección fue tomada de Etertics GNU/Linux, 
-# @Autor: Javier Obregón (GPLv3)
+# FIN (mensajes por idioma)
 # =========================================================================================
 
-function _idioma() 
-
-{
-
-IDIOMA=$(echo $LANG | cut -d_ -f1) # Idioma del sistema
-
-if [[ $IDIOMA = "es" ]]
-then
-_inicio_es
-
-elif [[ $IDIOMA = "en" ]]
-then
-_inicio_en
-
-elif [[ $IDIOMA = "gl" ]]
-then
-_inicio_gl
-
-elif [[ $IDIOMA = "pt" ]]
-then
-_inicio_pt
-
-elif [[ $IDIOMA = "fr" ]]
-then
-_inicio_fr
-
-elif [[ $IDIOMA = "it" ]]
-then
-_inicio_it
-
-elif [[ $IDIOMA = "de" ]]
-then
-_inicio_de
-
-elif [[ $IDIOMA = "ru" ]]
-then
-_inicio_ru
-
-else
-_inicio_en
-fi
-
-}
+function _fin_es(){ zenity --info --text "Configuraciones realizadas. Siempre puedes revertirlas." ;}
+function _fin_en(){ zenity --info --text "Settings applied. You can always revert them." ;}
+function _fin_gl(){ zenity --info --text "Configuración feita. Sempre podes revertela." ;}
+function _fin_pt(){ zenity --info --text "Configurações feitas. Você sempre pode revertê-las." ;}
+function _fin_fr(){ zenity --info --text "Paramètres appliqués. Vous pouvez toujours les inverser." ;}
+function _fin_it(){ zenity --info --text "Impostazioni applicate. Puoi sempre invertirle." ;}
+function _fin_de(){ zenity --info --text "Einstellungen vorgenommen. Sie können sie jederzeit rückgängig machen." ;}
+function _fin_ru(){ zenity --info --text "Настройки применены. Вы всегда можете отменить их." ;}
 
 # =========================================================================================
-# PROCESOS [NADA QUE TRADUCIR]
+# SALIR
 # =========================================================================================
+function _salir(){ exit 0; }
 
-# ACTIVAR FLATPAK
+# =========================================================================================
+# ACTIVAR FLATPAK (sin ostree)
+# =========================================================================================
+function _activar() {
+(
+    echo "5"; sleep 1
+    apt-get update -y
 
-function _activar()
-{
+    echo "20"; sleep 1
+    apt-get install -y flatpak gir1.2-flatpak-1.0 gnome-software-plugin-flatpak
 
-FILE="/usr/bin/mintinstall"
-
-if [ ! -e ${FILE} ]; then
-		clear
-		(
-		apt-get install gnome-software-plugin-flatpak -y
-		echo "25"; sleep 1
-		echo "# Procesando"; sleep 1
-		 
-		flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
-		echo "50"; sleep 1
-		echo "# Procesando"; sleep 1  
-		  
-		sudo apt-get install gir1.2-flatpak-1.0 -y
-		echo "50"; sleep 1
-		echo "# Procesando"; sleep 1 
-
-		zenity --progress --title="Configurando" --text="Ten paciencia, llevará tiempo" --percentage=0 --auto-close --auto-kill
-		
-		)|
-		if [ "$?" = -1 ] ; then
-		zenity --error --text="Configuración cancelada"
-		fi
-
-else
-		( 
-		sudo apt-get update -y
-		echo "10"; sleep 1
-		echo "# Procesando"; sleep 1
-
-		sudo apt-get install flatpak gir1.2-flatpak-1.0 -y
-		echo "15"; sleep 1
-		echo "# Procesando"; sleep 1
-
-		sudo apt-get install -f -y
-		echo "20"; sleep 1
-		echo "# Procesando"; sleep 1
-
-		sudo apt-get autoremove --purge -y
-		echo "25"; sleep 1
-		echo "# Procesando"; sleep 1
-
-		flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
-		echo "50"; sleep 1
-		echo "# Procesando"; sleep 1
-
-		sudo apt-get install gir1.2-flatpak-1.0 -y
-		echo "100"; sleep 1
-		echo "# Procesando"; sleep 1
-		
-		)|
-		zenity --progress --title="Configurando" --text="Ten paciencia, llevará tiempo" --percentage=0 --auto-close --auto-kill
-		if [ "$?" = -1 ] ; then
-		zenity --error --text="Configuración cancelada"
-		fi
-
-fi
-
-if which flatpak >/dev/null 2>&1
-    then
-		(		
-        flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
-        echo "25"; sleep 1
-		echo "# Procesando"; sleep 1
-        mkdir -p /var/lib/flatpak/exports/share/applications
-        echo "50"; sleep 1
-		echo "# Procesando"; sleep 1
-        mkdir -p /var/lib/flatpak/exports/share/icons
-        echo "100"; sleep 1
-		echo "# Procesando"; sleep 1
-		
-		)|
-		zenity --progress --title="Configurando" --text="Ten paciencia, llevará tiempo" --percentage=0 --auto-close --auto-kill
-		if [ "$?" = -1 ] ; then
-		zenity --error --text="Configuración cancelada"
-		fi
-		
+    echo "35"; sleep 1
+    # Si el repo está corrupto, eliminarlo
+    if [ -d /var/lib/flatpak ] && [ ! -d /var/lib/flatpak/repo/objects ]; then
+        rm -rf /var/lib/flatpak
     fi
 
-}
+    echo "50"; sleep 1
+    # Crear repo vacío válido
+    if ! [ -d /var/lib/flatpak/repo ]; then
+        mkdir -p /var/lib/flatpak/repo
+        touch /var/lib/flatpak/repo/config
+    fi
 
-# DESACTIVAR FLATPAK
+    echo "65"; sleep 1
+    # Agregar Flathub
+    flatpak remote-add --system --if-not-exists flathub \
+        https://dl.flathub.org/repo/flathub.flatpakrepo
 
-function _desactivar()
-{
-    (
-    sudo apt-get update -y
-    echo "20"; sleep 1
+    echo "80"; sleep 1
+    # Crear rutas necesarias para mintinstall
+    mkdir -p /var/lib/flatpak/exports/share/{applications,icons}
 
-    # Desinstalar Flatpak por completo
-    sudo apt-get remove --purge flatpak -y
-    echo "40"; sleep 1
-
-    sudo apt-get autoremove --purge -y
-    echo "60"; sleep 1
-
-    # Instalar ostree para crear un repositorio vacío válido
-    sudo apt-get install -y ostree
-    echo "70"; sleep 1
-
-    # Crear repo Flatpak válido pero vacío
-    sudo rm -rf /var/lib/flatpak/repo
-    sudo mkdir -p /var/lib/flatpak
-    sudo ostree init --mode=archive-z2 --repo=/var/lib/flatpak/repo
+    echo "95"; sleep 1
+    # Reparar si existe la herramienta
+    if command -v flatpak >/dev/null && flatpak repair --help >/dev/null 2>&1; then
+        flatpak repair --system --non-interactive || true
+    fi
 
     echo "100"; sleep 1
-    ) |
-    zenity --progress --title="Configurando" --text="Ten paciencia, llevará tiempo" --percentage=0 --auto-close --auto-kill
 
-    if [ "$?" = -1 ] ; then
-        zenity --error --text="Configuración cancelada"
-    fi
-}
-
-
-
-# =========================================================================================
-# CASTELLANO
-# =========================================================================================
-
-function _menuPrincipal_es()
-{
-opPrincipal=$(
-zenity --list --title "FLATPAK-CONFIG" --width="600" --height="300" \
---column="Opciones disponibles" \
-"Activar Flatpak" \
-"Desactivar Flatpak" \
-"Salir" \
-)
-if [[ $opPrincipal == "Activar Flatpak" ]]; then
-_activar
-_fin_es
-fi
-if [[ $opPrincipal == "Desactivar Flatpak" ]]; then
-_desactivar
-_fin_es
-fi
-if [[ $opPrincipal == "Salir" ]]; then
-_salir
-fi
+) | zenity --progress --title="Configurando Flatpak" --text="Ten paciencia..." \
+           --percentage=0 --auto-close --auto-kill
 }
 
 # =========================================================================================
-# INGLÉS
+# DESACTIVAR FLATPAK
 # =========================================================================================
+function _desactivar() {
+(
+    echo "10"; sleep 1
+    apt-get remove --purge -y flatpak gir1.2-flatpak-1.0 gnome-software-plugin-flatpak
 
-function _menuPrincipal_en()
-{
-opPrincipal=$(
-zenity --list --title "FLATPAK-CONFIG" --width="600" --height="300" \
---column="Available options" \
-"Activate Flatpak" \
-"Disable Flatpak" \
-"Exit" \
-)
-if [[ $opPrincipal == "Activate Flatpak" ]]; then
-_activar
-_fin_es
-fi
-if [[ $opPrincipal == "Disable Flatpak" ]]; then
-_desactivar
-_fin_es
-fi
-if [[ $opPrincipal == "Exit" ]]; then
-_salir
-fi
-}
+    echo "40"; sleep 1
+    apt-get autoremove --purge -y
 
+    echo "80"; sleep 1
+    rm -rf /var/lib/flatpak
 
+    echo "100"; sleep 1
 
-# =========================================================================================
-# GALLEGO
-# =========================================================================================
-
-function _menuPrincipal_gl()
-{
-opPrincipal=$(
-zenity --list --title "FLATPAK-CONFIG" --width="600" --height="300" \
---column="Opcións dispoñibles" \
-"Activa Flatpak" \
-"Desactivar Flatpak" \
-"Saída" \
-)
-if [[ $opPrincipal == "Activa Flatpak" ]]; then
-_activar
-_fin_es
-fi
-if [[ $opPrincipal == "Desactivar Flatpak" ]]; then
-_desactivar
-_fin_es
-fi
-if [[ $opPrincipal == "Saída" ]]; then
-_salir
-fi
-}
-
-
-
-# =========================================================================================
-# PORTUGUES
-# =========================================================================================
-
-function _menuPrincipal_pt()
-{
-opPrincipal=$(
-zenity --list --title "FLATPAK-CONFIG" --width="600" --height="300" \
---column="Opções disponíveis" \
-"Ativar Flatpak" \
-"Desativar Flatpak" \
-"Saia" \
-)
-if [[ $opPrincipal == "Ativar Flatpak" ]]; then
-_activar
-_fin_es
-fi
-if [[ $opPrincipal == "Desativar Flatpak" ]]; then
-_desactivar
-_fin_es
-fi
-if [[ $opPrincipal == "Saia" ]]; then
-_salir
-fi
+) | zenity --progress --title="Desactivando Flatpak" --text="Espere..." \
+           --percentage=0 --auto-close --auto-kill
 }
 
 # =========================================================================================
-# FRANCÉS
+# MENÚS POR IDIOMA
 # =========================================================================================
 
-function _menuPrincipal_fr()
-{
-opPrincipal=$(
-zenity --list --title "FLATPAK-CONFIG" --width="600" --height="300" \
---column="Options disponibles " \
-"Activer Flatpak" \
-"Désactiver Flatpak" \
-"Sortir" \
-)
-if [[ $opPrincipal == "Activer Flatpak" ]]; then
-_activar
-_fin_es
-fi
-if [[ $opPrincipal == "Désactiver Flatpak" ]]; then
-_desactivar
-_fin_es
-fi
-if [[ $opPrincipal == "Sortir" ]]; then
-_salir
-fi
+function _menu_tpl() {
+    local title="$1"
+    local opt1="$2"
+    local opt2="$3"
+    local exit_lbl="$4"
+    local finish_func="$5"
+
+    opPrincipal=$(
+        zenity --list --title="$title" --width="600" --height="300" \
+        --column="" "$opt1" "$opt2" "$exit_lbl"
+    )
+
+    case "$opPrincipal" in
+        "$opt1") _activar; $finish_func ;;
+        "$opt2") _desactivar; $finish_func ;;
+        "$exit_lbl") _salir ;;
+    esac
 }
 
-# =========================================================================================
-# ITALIANO
-# =========================================================================================
-
-function _menuPrincipal_it ()
-{
-opPrincipal=$(
-zenity --list --title "FLATPAK-CONFIG" --width="600" --height="300" \
---column="Opzioni disponibili" \
-"Attiva Flatpak" \
-"Disabilita Flatpak" \
-"Esci" \
-)
-if [[ $opPrincipal == "Attiva Flatpak" ]]; then
-_activar
-_fin_es
-fi
-if [[ $opPrincipal == "Disabilita Flatpak" ]]; then
-_desactivar
-_fin_es
-fi
-if [[ $opPrincipal == "Esci" ]]; then
-_salir
-fi
-}
-
+function _menuPrincipal_es(){ _menu_tpl "FLATPAK-CONFIG" "Activar Flatpak" "Desactivar Flatpak" "Salir" _fin_es; }
+function _menuPrincipal_en(){ _menu_tpl "FLATPAK-CONFIG" "Activate Flatpak" "Disable Flatpak" "Exit" _fin_en; }
+function _menuPrincipal_gl(){ _menu_tpl "FLATPAK-CONFIG" "Activa Flatpak" "Desactivar Flatpak" "Saída" _fin_gl; }
+function _menuPrincipal_pt(){ _menu_tpl "FLATPAK-CONFIG" "Ativar Flatpak" "Desativar Flatpak" "Sair" _fin_pt; }
+function _menuPrincipal_fr(){ _menu_tpl "FLATPAK-CONFIG" "Activer Flatpak" "Désactiver Flatpak" "Sortir" _fin_fr; }
+function _menuPrincipal_it(){ _menu_tpl "FLATPAK-CONFIG" "Attiva Flatpak" "Disabilita Flatpak" "Esci" _fin_it; }
+function _menuPrincipal_de(){ _menu_tpl "FLATPAK-CONFIG" "Flatpak aktivieren" "Flatpak deaktivieren" "Beenden" _fin_de; }
+function _menuPrincipal_ru(){ _menu_tpl "FLATPAK-CONFIG" "Активировать Flatpak" "Отключить Flatpak" "Выход" _fin_ru; }
 
 # =========================================================================================
-# ALEMAN
+# DETECCIÓN DE IDIOMA
 # =========================================================================================
 
-function _menuPrincipal_de()
-{
-opPrincipal=$(
-zenity --list --title "FLATPAK-CONFIG" --width="600" --height="300" \
---column="Verfügbare Optionen " \
-"Flatpak aktivieren" \
-"Flatpak deaktivieren" \
-"Aussteigen" \
-)
-if [[ $opPrincipal == "Flatpak aktivieren" ]]; then
-_activar
-_fin_es
-fi
-if [[ $opPrincipal == "Flatpak deaktivieren" ]]; then
-_desactivar
-_fin_es
-fi
-if [[ $opPrincipal == "Aussteigen" ]]; then
-_salir
-fi
-}
-
-# =========================================================================================
-# RUSO
-# =========================================================================================
-
-function _menuPrincipal_ru()
-{
-opPrincipal=$(
-zenity --list --title "FLATPAK-CONFIG" --width="600" --height="300" \
---column="Доступные Варианты  " \
-"Активировать Flatpak" \
-"Отключить Flatpak" \
-"Убирайся" \
-)
-if [[ $opPrincipal == "Активировать Flatpak" ]]; then
-_activar
-_fin_es
-fi
-if [[ $opPrincipal == "Отключить Flatpak" ]]; then
-_desactivar
-_fin_es
-fi
-if [[ $opPrincipal == "Убирайся" ]]; then
-_salir
-fi
+function _idioma() {
+    _require_root
+    
+    case "${LANG%%_*}" in
+        es) _menuPrincipal_es ;;
+        en) _menuPrincipal_en ;;
+        gl) _menuPrincipal_gl ;;
+        pt) _menuPrincipal_pt ;;
+        fr) _menuPrincipal_fr ;;
+        it) _menuPrincipal_it ;;
+        de) _menuPrincipal_de ;;
+        ru) _menuPrincipal_ru ;;
+        *)  _menuPrincipal_en ;;
+    esac
 }
 
 # =========================================================================================
